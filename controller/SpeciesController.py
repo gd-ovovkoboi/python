@@ -1,7 +1,6 @@
 from flask import jsonify, request, make_response, Blueprint
 
-from model.SpeciesModel import *
-from model.AnimalModel import *
+from models import *
 
 species_api = Blueprint('species_api', __name__)
 
@@ -9,7 +8,14 @@ species_api = Blueprint('species_api', __name__)
 # GET /species
 @species_api.route('/species')
 def get_species():
-    return jsonify({'species': Species.get_all_species(Species())})
+    result = []
+    for species in Species.query.all():
+        species_info = {
+            'name': species.name,
+            'animal_count': len(species.animals),
+        }
+        result.append(species_info)
+    return jsonify({'species': result})
 
 
 # POST /species
@@ -19,7 +25,8 @@ def add_species():
     if valid_species_object(request_data):
         new_species = Species(name=request_data['name'], description=request_data['description'],
                               price=request_data['price'])
-        Species.add_species(new_species)
+        db.session.add(new_species)
+        db.session.commit()
         return make_response(jsonify({}), 201)
     else:
         return make_response(jsonify({'error': 'Invalid species object passed in request',
@@ -30,18 +37,23 @@ def add_species():
 # GET /species/<int:id>
 @species_api.route('/species/<int:id>')
 def get_animals_by_species_id(id):
-    return_value = []
-    species = Species.get_species(Species(id=id))
+    species = Species.query.filter_by(id=id).first()
     if species is not None:
-        for animal in Animal.get_all_animals(Animal()):
-            if animal['species_id'] == id:
-                animal_info = {
-                    'name': animal['name'],
-                    'id': animal['id'],
-                    'species': species.name
-                }
-                return_value.append(animal_info)
-        return jsonify(return_value)
+        animals = []
+        for animal in species.animals:
+            animal_info = {
+                'name': animal.name,
+                'description': animal.description,
+                'age': animal.age,
+                'price': animal.price
+            }
+            animals.append(animal_info)
+        species_info = {
+            'name': species.name,
+            'description': species.description,
+            'animals': animals
+        }
+        return jsonify(species_info)
     else:
         return make_response(jsonify({
             'error': 'Invalid species ID',
