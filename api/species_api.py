@@ -1,12 +1,14 @@
 from flask import jsonify, request, make_response, Blueprint
 
 from models import *
+from decorators import *
 
 species_api = Blueprint('species_api', __name__)
 
 
 # GET /species
 @species_api.route('/species')
+@log_decorator
 def get_species():
     result = []
     for species in Species.query.all():
@@ -20,6 +22,7 @@ def get_species():
 
 # POST /species
 @species_api.route('/species', methods=['POST'])
+@log_decorator
 def add_species():
     request_data = request.get_json()
     if valid_species_object(request_data):
@@ -36,6 +39,7 @@ def add_species():
 
 # GET /species/<int:id>
 @species_api.route('/species/<int:id>')
+@log_decorator
 def get_animals_by_species_id(id):
     species = Species.query.filter_by(id=id).first()
     if species is not None:

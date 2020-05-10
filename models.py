@@ -2,7 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-from settings import app
+from configuration import app
 
 db = SQLAlchemy(app)
 

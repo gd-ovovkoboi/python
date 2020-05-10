@@ -1,6 +1,7 @@
 from flask import jsonify, request, make_response, Blueprint
 
 from models import *
+from decorators import *
 
 animal_api = Blueprint('animal_api', __name__)
 
@@ -13,6 +14,7 @@ invalid_animal_object_error_msg = {
 
 # GET /animals
 @animal_api.route('/animals')
+@log_decorator
 def get_animals():
     result = []
     for animal in Animal.query.all():
@@ -29,6 +31,7 @@ def get_animals():
 
 # GET /animals/<int:id>
 @animal_api.route('/animals/<int:id>')
+@log_decorator
 def get_animal_by_id(id):
     animal = Animal.query.filter_by(id=id).first()
     if animal is not None:
@@ -50,6 +53,7 @@ def get_animal_by_id(id):
 
 # POST /animals
 @animal_api.route('/animals', methods=['POST'])
+@log_decorator
 def add_animal():
     request_data = request.get_json()
     if valid_animal_object(request_data):
@@ -65,6 +69,7 @@ def add_animal():
 
 # PUT /animals/<int:id>
 @animal_api.route('/animals/<int:id>', methods=['PUT'])
+@log_decorator
 def replace_animal(id):
     request_data = request.get_json()
     if valid_animal_object(request_data):
@@ -84,6 +89,7 @@ def replace_animal(id):
 
 # DELETE /animals/<int:id>
 @animal_api.route('/animals/<int:id>', methods=['DELETE'])
+@log_decorator
 def delete_book(id):
     Animal.query.filter_by(id=id).delete()
     db.session.commit()

@@ -1,7 +1,7 @@
-from settings import app
-from controller.CenterController import center_api
-from controller.SpeciesController import  species_api
-from controller.AnimalController import animal_api
+from configuration import app
+from api.center_api import center_api
+from api.species_api import  species_api
+from api.animal_api import animal_api
 
 app.register_blueprint(center_api)
 app.register_blueprint(species_api)

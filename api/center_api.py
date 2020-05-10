@@ -1,12 +1,14 @@
 from flask import jsonify, request, make_response, Blueprint
 
 from models import *
+from decorators import *
 
 center_api = Blueprint('center_api', __name__)
 
 
 # GET /centers
 @center_api.route('/centers')
+@log_decorator
 def get_centers():
     result = []
     for center in Center.query.all():
@@ -20,6 +22,7 @@ def get_centers():
 
 # POST /centers
 @center_api.route('/centers', methods=['POST'])
+@log_decorator
 def add_center():
     request_data = request.get_json()
     if valid_center_object(request_data):
@@ -37,6 +40,7 @@ def add_center():
 
 # GET /centers/<int:id>
 @center_api.route('/centers/<int:id>')
+@log_decorator
 def get_center_by_id(id):
     center = Center.query.filter_by(id=id).first()
     if center is not None:
