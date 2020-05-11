@@ -65,4 +65,4 @@ def get_animals_by_species_id(id):
 
 
 def valid_species_object(species):
-    return 'name' in species and 'description' in species and 'price' in species
+    return 'name' in species and 'description' in species and 'price' in species and isinstance(species['price'], float)

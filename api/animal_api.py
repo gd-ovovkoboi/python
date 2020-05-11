@@ -98,4 +98,5 @@ def delete_book(id):
 
 def valid_animal_object(animal):
     return 'center_id' in animal and 'name' in animal and 'description' in animal \
-           and 'age' in animal and 'species_id' in animal and 'price' in animal
+           and 'age' in animal and isinstance(animal['age'], int) \
+           and 'species_id' in animal and 'price' in animal and isinstance(animal['price'], float)
