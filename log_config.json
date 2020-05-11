@@ -1,0 +1,40 @@
+{
+  "version": 1,
+  "formatters": {
+    "default": {
+      "format": "[%(asctime)s] %(levelname)s in %(module)s: %(message)s"
+    }
+  },
+  "handlers": {
+    "wsgi": {
+      "class": "logging.StreamHandler",
+      "stream": "ext://flask.logging.wsgi_errors_stream",
+      "formatter": "default"
+    },
+    "file": {
+      "class": "logging.FileHandler",
+      "level": "DEBUG",
+      "formatter": "default",
+      "filename": "app.log",
+      "mode": "w",
+      "encoding": "utf-8"
+    }
+  },
+  "loggers": {
+    "": {
+      "handlers": [
+        "wsgi",
+        "file"
+      ],
+      "level": "DEBUG",
+      "propagate": "False"
+    },
+    "werkzeug": {
+      "handlers": [
+        "wsgi"
+      ],
+      "level": "ERROR",
+      "propagate": "False"
+    }
+  }
+}
