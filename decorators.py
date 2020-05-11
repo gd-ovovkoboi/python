@@ -7,6 +7,7 @@ from configuration import app
 
 
 def log_request(fn):
+    """Decorator function to log API request info"""
     @wraps(fn)
     def wrapper(*args, **kwargs):
         try:
@@ -20,6 +21,7 @@ def log_request(fn):
 
 
 def token_required(fn):
+    """Decorator function to check if valid JWT token was provided before performing an API call"""
     @wraps(fn)
     def wrapper(*args, **kwargs):
         token = request.args.get('token')

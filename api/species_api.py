@@ -10,6 +10,7 @@ species_api = Blueprint('species_api', __name__)
 @species_api.route('/species')
 @log_request
 def get_species():
+    """Returns the collection of all species"""
     result = []
     for species in Species.query.all():
         species_info = {
@@ -25,6 +26,7 @@ def get_species():
 @token_required
 @log_request
 def add_species():
+    """Creates a new species or returns bad request in case of invalid object"""
     request_data = request.get_json()
     if valid_species_object(request_data):
         new_species = Species(name=request_data['name'], description=request_data['description'],
@@ -42,6 +44,7 @@ def add_species():
 @species_api.route('/species/<int:id>')
 @log_request
 def get_animals_by_species_id(id):
+    """Returns detailed information regarding the species with the specified ID"""
     species = Species.query.filter_by(id=id).first()
     if species is not None:
         animals = []
@@ -66,4 +69,5 @@ def get_animals_by_species_id(id):
 
 
 def valid_species_object(species):
+    """Validates passed species object, returns true in case it is valid and false otherwise"""
     return 'name' in species and 'description' in species and 'price' in species and isinstance(species['price'], float)

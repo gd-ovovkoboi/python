@@ -16,6 +16,7 @@ invalid_animal_object_error_msg = {
 @animal_api.route('/animals')
 @log_request
 def get_animals():
+    """Returns the collection of all animals"""
     result = []
     for animal in Animal.query.all():
         animal_info = {
@@ -33,6 +34,7 @@ def get_animals():
 @animal_api.route('/animals/<int:id>')
 @log_request
 def get_animal_by_id(id):
+    """Returns detailed information regarding the animal with the specified ID"""
     animal = Animal.query.filter_by(id=id).first()
     if animal is not None:
         animal_info = {
@@ -56,6 +58,7 @@ def get_animal_by_id(id):
 @token_required
 @log_request
 def add_animal():
+    """Creates a new animal or returns bad request in case of invalid object"""
     request_data = request.get_json()
     if valid_animal_object(request_data):
         new_animal = Animal(center_id=request_data['center_id'], name=request_data['name'],
@@ -73,6 +76,7 @@ def add_animal():
 @token_required
 @log_request
 def replace_animal(id):
+    """Rewrites existing animal or returns bad request in case of invalid object"""
     request_data = request.get_json()
     if valid_animal_object(request_data):
         updated_animal = Animal.query.filter_by(id=id).first()
@@ -94,12 +98,14 @@ def replace_animal(id):
 @token_required
 @log_request
 def delete_book(id):
+    """Deletes animal with the specified ID"""
     Animal.query.filter_by(id=id).delete()
     db.session.commit()
     return make_response(jsonify({}), 204)
 
 
 def valid_animal_object(animal):
+    """Validates passed animal object, returns true in case it is valid and false otherwise"""
     return 'center_id' in animal and 'name' in animal and 'description' in animal \
            and 'age' in animal and isinstance(animal['age'], int) \
            and 'species_id' in animal and 'price' in animal and isinstance(animal['price'], float)

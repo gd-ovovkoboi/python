@@ -12,6 +12,7 @@ login_api = Blueprint('login_api', __name__)
 @login_api.route('/login', methods=['POST'])
 @log_request
 def get_token():
+    """Returns a JWT token in case passed credentials are valid"""
     request_data = request.get_json()
     center = Center.query.filter_by(login=request_data['login']).filter_by(password=request_data['password']).first()
     if center is not None:
