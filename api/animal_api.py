@@ -1,7 +1,7 @@
-from flask import jsonify, request, make_response, Blueprint
+from flask import make_response, Blueprint
 
-from models import *
 from decorators import *
+from models import *
 
 animal_api = Blueprint('animal_api', __name__)
 
@@ -14,7 +14,7 @@ invalid_animal_object_error_msg = {
 
 # GET /animals
 @animal_api.route('/animals')
-@log_decorator
+@log_request
 def get_animals():
     result = []
     for animal in Animal.query.all():
@@ -31,7 +31,7 @@ def get_animals():
 
 # GET /animals/<int:id>
 @animal_api.route('/animals/<int:id>')
-@log_decorator
+@log_request
 def get_animal_by_id(id):
     animal = Animal.query.filter_by(id=id).first()
     if animal is not None:
@@ -51,9 +51,10 @@ def get_animal_by_id(id):
             'helpString': 'Make sure animal with ID {} exists'.format(id)}), 400)
 
 
-# POST /animals
+# POST /animals?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
 @animal_api.route('/animals', methods=['POST'])
-@log_decorator
+@token_required
+@log_request
 def add_animal():
     request_data = request.get_json()
     if valid_animal_object(request_data):
@@ -67,9 +68,10 @@ def add_animal():
         return make_response(jsonify(invalid_animal_object_error_msg), 400)
 
 
-# PUT /animals/<int:id>
+# PUT /animals/<int:id>?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
 @animal_api.route('/animals/<int:id>', methods=['PUT'])
-@log_decorator
+@token_required
+@log_request
 def replace_animal(id):
     request_data = request.get_json()
     if valid_animal_object(request_data):
@@ -87,9 +89,10 @@ def replace_animal(id):
         return make_response(jsonify(invalid_animal_object_error_msg), 400)
 
 
-# DELETE /animals/<int:id>
+# DELETE /animals/<int:id>?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
 @animal_api.route('/animals/<int:id>', methods=['DELETE'])
-@log_decorator
+@token_required
+@log_request
 def delete_book(id):
     Animal.query.filter_by(id=id).delete()
     db.session.commit()

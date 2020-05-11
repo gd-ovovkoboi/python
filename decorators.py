@@ -1,13 +1,14 @@
 from functools import wraps
 
-from flask import request
+import jwt
+from flask import request, jsonify
 
 from configuration import app
 
 
-def log_decorator(fn):
+def log_request(fn):
     @wraps(fn)
-    def decorated(*args, **kwargs):
+    def wrapper(*args, **kwargs):
         try:
             app.logger.debug('\n Method: {} \n URL: {}\n Body: {}'.format(request.method, request.url, request.json))
             return fn(*args, **kwargs)
@@ -15,4 +16,17 @@ def log_decorator(fn):
             app.logger.debug("Exception {0}".format(ex))
             raise ex
 
-    return decorated
+    return wrapper
+
+
+def token_required(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        token = request.args.get('token')
+        try:
+            jwt.decode(token, app.config['SECRET_KEY'])
+            return fn(*args, **kwargs)
+        except Exception as ex:
+            return jsonify({'error': 'Need a valid token to access this endpoint'}), 403
+
+    return wrapper
