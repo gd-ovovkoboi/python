@@ -24,7 +24,7 @@ def token_required(fn):
     def wrapper(*args, **kwargs):
         token = request.args.get('token')
         try:
-            jwt.decode(token, app.config['SECRET_KEY'])
+            jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
             return fn(*args, **kwargs)
         except Exception as ex:
             return jsonify({'error': 'Need a valid token to access this endpoint'}), 403

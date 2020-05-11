@@ -19,6 +19,6 @@ def get_token():
         db.session.add(access_log_record)
         db.session.commit()
         expiration_date = datetime.datetime.utcnow() + datetime.timedelta(minutes=app.config['SESSION_DURATION_MIN'])
-        return jwt.encode({'exp': expiration_date}, app.config['SECRET_KEY'])
+        return jwt.encode({'exp': expiration_date}, app.config['SECRET_KEY'], algorithm='HS256')
     else:
         return make_response(jsonify({'error': 'Incorrect login or password'}), 403)
