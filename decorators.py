@@ -14,7 +14,7 @@ def log_request(fn):
             app.logger.debug('\n Method: {} \n URL: {}\n Body: {}'.format(request.method, request.url, request.json))
             return fn(*args, **kwargs)
         except Exception as ex:
-            app.logger.debug("Exception {0}".format(ex))
+            app.logger.exception(ex)
             raise ex
 
     return wrapper

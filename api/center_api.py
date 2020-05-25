@@ -1,16 +1,24 @@
+from cerberus import Validator
 from flask import make_response, Blueprint
+from flask import request, jsonify
 
-from decorators import *
-from models import *
+from decorators import log_request
+from models import Center, db
 
 center_api = Blueprint('center_api', __name__)
 
+required_request_input = {'name': {'type': 'string', 'required': True},
+                          'login': {'type': 'string', 'required': True},
+                          'password': {'type': 'string', 'required': True},
+                          'address': {'type': 'string', 'required': True}}
 
-# GET /centers
+
 @center_api.route('/centers')
 @log_request
 def get_centers():
-    """Returns the collection of all centers"""
+    """ GET /centers
+    Returns the collection of all centers
+    """
     result = []
     for center in Center.query.all():
         center_info = {
@@ -21,13 +29,14 @@ def get_centers():
     return jsonify({'centers': result})
 
 
-# POST /register
 @center_api.route('/register', methods=['POST'])
 @log_request
 def add_center():
-    """Creates a new center or returns bad request in case of invalid object"""
+    """ POST /register
+    Creates a new center or returns bad request in case of invalid object
+    """
     request_data = request.get_json()
-    if valid_center_object(request_data):
+    if Validator(required_request_input).validate(request_data):
         new_center = Center(name=request_data['name'], login=request_data['login'],
                             password=request_data['password'], address=request_data['address'])
         db.session.add(new_center)
@@ -40,11 +49,12 @@ def add_center():
                           "'password': 'password', 'address': 'Krakow, ul ..'}"}), 400)
 
 
-# GET /centers/<int:id>
 @center_api.route('/centers/<int:id>')
 @log_request
 def get_center_by_id(id):
-    """Returns detailed information regarding the center with the specified ID"""
+    """ GET /centers/<int:id>
+    Returns detailed information regarding the center with the specified ID
+    """
     center = Center.query.filter_by(id=id).first()
     if center is not None:
         animals = []
@@ -66,8 +76,3 @@ def get_center_by_id(id):
         return make_response(jsonify({
             'error': 'Invalid center ID',
             'helpString': 'Make sure center with ID {} exists'.format(id)}), 400)
-
-
-def valid_center_object(center):
-    """Validates passed center object, returns true in case it is valid and false otherwise"""
-    return 'name' in center and 'login' in center and 'password' in center and 'address' in center

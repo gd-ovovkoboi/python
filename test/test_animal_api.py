@@ -3,7 +3,7 @@ import os
 import unittest
 
 from api.animal_api import animal_api
-from models import *
+from models import Animal, db, app
 
 
 class AnimalTests(unittest.TestCase):

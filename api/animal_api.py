@@ -1,9 +1,18 @@
+from cerberus import Validator
 from flask import make_response, Blueprint
+from flask import request, jsonify
 
-from decorators import *
-from models import *
+from decorators import log_request, token_required
+from models import Animal, db
 
 animal_api = Blueprint('animal_api', __name__)
+
+required_request_input = {'name': {'type': 'string', 'required': True},
+                          'description': {'type': 'string', 'required': True},
+                          'center_id': {'type': 'integer', 'required': True},
+                          'age': {'type': 'integer', 'required': True},
+                          'species_id': {'type': 'integer', 'required': True},
+                          'price': {'type': 'float', 'required': True}}
 
 invalid_animal_object_error_msg = {
     'error': 'Invalid animal object passed in request',
@@ -12,11 +21,12 @@ invalid_animal_object_error_msg = {
 }
 
 
-# GET /animals
 @animal_api.route('/animals')
 @log_request
 def get_animals():
-    """Returns the collection of all animals"""
+    """ GET /animals
+    Returns the collection of all animals
+    """
     result = []
     for animal in Animal.query.all():
         animal_info = {
@@ -30,11 +40,12 @@ def get_animals():
     return jsonify({'animals': result})
 
 
-# GET /animals/<int:id>
 @animal_api.route('/animals/<int:id>')
 @log_request
 def get_animal_by_id(id):
-    """Returns detailed information regarding the animal with the specified ID"""
+    """ GET /animals/<int:id>
+    Returns detailed information regarding the animal with the specified ID
+    """
     animal = Animal.query.filter_by(id=id).first()
     if animal is not None:
         animal_info = {
@@ -53,14 +64,15 @@ def get_animal_by_id(id):
             'helpString': 'Make sure animal with ID {} exists'.format(id)}), 400)
 
 
-# POST /animals?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
 @animal_api.route('/animals', methods=['POST'])
 @token_required
 @log_request
 def add_animal():
-    """Creates a new animal or returns bad request in case of invalid object"""
+    """ POST /animals?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
+    Creates a new animal or returns bad request in case of invalid object
+    """
     request_data = request.get_json()
-    if valid_animal_object(request_data):
+    if Validator(required_request_input).validate(request_data):
         new_animal = Animal(center_id=request_data['center_id'], name=request_data['name'],
                             description=request_data['description'], age=request_data['age'],
                             species_id=request_data['species_id'], price=request_data['price'])
@@ -71,14 +83,15 @@ def add_animal():
         return make_response(jsonify(invalid_animal_object_error_msg), 400)
 
 
-# PUT /animals/<int:id>?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
 @animal_api.route('/animals/<int:id>', methods=['PUT'])
 @token_required
 @log_request
 def replace_animal(id):
-    """Rewrites existing animal or returns bad request in case of invalid object"""
+    """ PUT /animals/<int:id>?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
+    Rewrites existing animal or returns bad request in case of invalid object
+    """
     request_data = request.get_json()
-    if valid_animal_object(request_data):
+    if Validator(required_request_input).validate(request_data):
         updated_animal = Animal.query.filter_by(id=id).first()
         updated_animal.id = id
         updated_animal.center_id = request_data['center_id']
@@ -93,19 +106,13 @@ def replace_animal(id):
         return make_response(jsonify(invalid_animal_object_error_msg), 400)
 
 
-# DELETE /animals/<int:id>?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
 @animal_api.route('/animals/<int:id>', methods=['DELETE'])
 @token_required
 @log_request
 def delete_book(id):
-    """Deletes animal with the specified ID"""
+    """ DELETE /animals/<int:id>?token=uEam0vbBtaK8slCuk-RDakZSvtxDuUIfuQs0
+    Deletes animal with the specified ID
+    """
     Animal.query.filter_by(id=id).delete()
     db.session.commit()
     return make_response(jsonify({}), 204)
-
-
-def valid_animal_object(animal):
-    """Validates passed animal object, returns true in case it is valid and false otherwise"""
-    return 'center_id' in animal and 'name' in animal and 'description' in animal \
-           and 'age' in animal and isinstance(animal['age'], int) \
-           and 'species_id' in animal and 'price' in animal and isinstance(animal['price'], float)
